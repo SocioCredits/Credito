@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SocioCredits - Panel de Administración</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00A86B;
+      --primary-dark: #007A4D;
+      --primary-light: #E6F7F0;
+      --secondary: #0A2540;
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --danger: #EF4444;
+      --danger-light: #FEF2F2;
+      --warning: #F59E0B;
+      --warning-light: #FEF3C7;
+      --success: #10B981;
+      --success-light: #ECFDF5;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text-main); line-height: 1.5; }
+
+    /* PANTALLA DE LOGIN */
+    #loginScreen {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--secondary);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+    .login-card {
+      background: white;
+      padding: 40px;
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .login-card h2 { font-size: 24px; color: var(--secondary); margin-bottom: 8px; font-weight: 800; }
+    .login-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; text-align: left; }
+    label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--secondary); }
+    input {
+      width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
+      border-radius: 10px; font-size: 14px; outline: none; transition: border-color 0.2s;
+    }
+    input:focus { border-color: var(--primary); }
+    .btn {
+      width: 100%; background: var(--primary); color: white; border: none;
+      padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 800;
+      cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 12px rgba(0,168,107,0.3);
+    }
+    .btn:hover { background: var(--primary-dark); }
+
+    /* DASHBOARD PRINCIPAL */
+    #adminDashboard { display: none; min-height: 100vh; }
+    
+    .admin-nav {
+      background: var(--secondary);
+      color: white;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .admin-brand { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+    .admin-brand span { background: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 12px; }
+    .btn-logout {
+      background: rgba(255,255,255,0.1); color: white; border: none;
+      padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+    .btn-logout:hover { background: var(--danger); }
+
+    .main-content {
+      max-width: 1350px;
+      margin: 30px auto;
+      padding: 0 24px;
+    }
+
+    /* ESTADÍSTICAS RÁPIDAS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .stat-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+    .stat-value { font-size: 24px; font-weight: 800; color: var(--secondary); }
+    .stat-value.green { color: var(--primary); }
+
+    /* SECCIÓN DE SOLICITUDES */
+    .section-card {
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      overflow: hidden;
+    }
+    .section-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .section-header h3 { font-size: 18px; font-weight: 800; color: var(--secondary); }
+    .actions-bar { display: flex; gap: 10px; }
+    
+    .btn-sm {
+      padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: none;
+    }
+    .btn-refresh { background: var(--primary-light); color: var(--primary-dark); }
+    .btn-refresh:hover { background: var(--primary); color: white; }
+    .btn-clear { background: var(--danger-light); color: var(--danger); }
+    .btn-clear:hover { background: var(--danger); color: white; }
+
+    /* TABLA DE CLIENTES */
+    .table-container { overflow-x: auto; }
+    .admin-table {
+      width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;
+    }
+    .admin-table th {
+      background: #F1F5F9; color: var(--secondary); padding: 14px 16px; font-weight: 700;
+      border-bottom: 2px solid var(--border);
+    }
+    .admin-table td {
+      padding: 14px 16px; border-bottom: 1px solid var(--border); color: var(--text-main);
+      vertical-align: middle;
+    }
+    .admin-table tr:hover { background: #FAFAFA; }
+
+    .badge-status {
+      display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800;
+    }
+    .status-pendiente { background: var(--warning-light); color: #B45309; }
+    .status-aprobado { background: var(--success-light); color: #047857; }
+    .status-rechazado { background: var(--danger-light); color: #B91C1C; }
+    .status-pagado { background: #E0F2FE; color: #0369A1; }
+
+    .client-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+    .btn-action {
+      padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: white;
+    }
+    .btn-approve { color: var(--success); border-color: var(--success); }
+    .btn-approve:hover { background: var(--success); color: white; }
+    .btn-reject { color: var(--danger); border-color: var(--danger); }
+    .btn-reject:hover { background: var(--danger); color: white; }
+    .btn-pay { color: #0369A1; border-color: #0369A1; }
+    .btn-pay:hover { background: #0369A1; color: white; }
+    .btn-plus { color: var(--primary); border-color: var(--primary); font-weight: 800; }
+    .btn-plus:hover { background: var(--primary); color: white; }
+    .btn-delete { color: var(--text-muted); }
+    .btn-delete:hover { background: var(--text-muted); color: white; }
+
+    .saldo-text { font-weight: 800; color: var(--danger); }
+    .saldo-cero { color: var(--success); }
+
+    .empty-state {
+      text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 15px;
+    }
+
+    @media(max-width: 768px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .admin-nav { padding: 14px 16px; }
+      .main-content { padding: 0 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PANTALLA DE ACCESO ADMINISTRADOR -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <h2>SocioCredits Admin</h2>
+      <p>Ingresa la contraseña de operador para gestionar las solicitudes.</p>
+      <div class="form-group">
+        <label for="adminPass">Contraseña de Administrador:</label>
+        <input type="password" id="adminPass" placeholder="••••••••">
+      </div>
+      <button class="btn" onclick="verificarLogin()">Acceder al Panel</button>
+    </div>
+  </div>
+
+  <!-- PANEL DE GESTIÓN -->
+  <div id="adminDashboard">
+    <nav class="admin-nav">
+      <div class="admin-brand">
+        SocioCredits <span>Admin Panel</span>
+      </div>
+      <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+    </nav>
+
+    <main class="main-content">
+      <!-- RESUMEN / ESTADÍSTICAS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-title">Total Solicitudes</div>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Capital Comprometido</div>
+          <div class="stat-value" id="statCapital">$0 COP</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Ganancias Proyectadas (30%)</div>
+          <div class="stat-value green" id="statGanancias">$0 COP</div>
+        </div>
+      </div>
+
+      <!-- BANDEJA DE SOLICITUDES -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Gestión de Créditos y Cuotas</h3>
+          <div class="actions-bar">
+            <button class="btn-sm btn-refresh" onclick="cargarSolicitudes()">🔄 Actualizar</button>
+            <button class="btn-sm btn-clear" onclick="limpiarHistorial()">🗑️ Borrar Todo</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Folio / Fecha</th>
+                <th>Cliente</th>
+                <th>Crédito Total</th>
+                <th>Cuotas (Abonadas)</th>
+                <th>Saldo Pendiente</th>
+                <th>Estado</th>
+                <th>Acciones Rápidas</th>
+              </tr>
+            </thead>
+            <tbody id="tablaSolicitudesBody">
+              <!-- Dinámico -->
+            </tbody>
+          </table>
+          <div id="emptyState" class="empty-state" style="display: none;">
+            No hay créditos registrados todavía.
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    var PASSWORD_ADMIN = "neiva2026";
+
+    function verificarLogin() {
+      var pass = document.getElementById('adminPass').value;
+      if (pass === PASSWORD_ADMIN) {
+        localStorage.setItem('sociocredits_auth', 'true');
+        mostrarDashboard();
+      } else {
+        alert("❌ Contraseña incorrecta.");
+      }
+    }
+
+    function mostrarDashboard() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminDashboard').style.display = 'block';
+      cargarSolicitudes();
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem('sociocredits_auth');
+      document.getElementById('adminDashboard').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('adminPass').value = '';
+    }
+
+    window.onload = function() {
+      if (localStorage.getItem('sociocredits_auth') === 'true') {
+        mostrarDashboard();
+      }
+    };
+
+    function formatearCOP(valor) {
+      return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(valor || 0);
+    }
+
+    function cargarSolicitudes() {
+      var solicitudes = JSON.parse(localStorage.getItem('sociocredits_solicitudes') || '[]');
+      var tbody = document.getElementById('tablaSolicitudesBody');
+      var emptyState = document.getElementById('emptyState');
+      
+      tbody.innerHTML = '';
+
+      if (solicitudes.length === 0) {
+        emptyState.style.display = 'block';
+        actualizarEstadisticas([]);
+        return;
+      }
+
+      emptyState.style.display = 'none';
+
+      solicitudes.forEach(function(sol, index) {
+        // Inicializar campos de cuotas si no existen en registros viejos
+        if (sol.cuotasAbonadas === undefined) sol.cuotasAbonadas = 0;
+        if (sol.totalCuotas === undefined) sol.totalCuotas = parseInt(sol.plazo) || 4; // Por defecto basado en el plazo seleccionado
+
+        var totalNum = sol.totalNum || (sol.montoNum * 1.30);
+        var valorCuota = totalNum / sol.totalCuotas;
+        var saldoPendiente = totalNum - (sol.cuotasAbonadas * valorCuota);
+        if (saldoPendiente < 0) saldoPendiente = 0;
+
+        var tr = document.createElement('tr');
+        
+        var estadoClase = 'status-pendiente';
+        if (sol.estado === 'Aprobado') estadoClase = 'status-aprobado';
+        if (sol.estado === 'Rechazado') estadoClase = 'status-rechazado';
+        if (sol.estado === 'Pagado Total') estadoClase = 'status-pagado';
+
+        var claseSaldo = saldoPendiente === 0 ? 'saldo-cero' : 'saldo-text';
+
+        tr.innerHTML = `
+          <td><strong>${sol.folio}</strong><br><small style="color:var(--text-muted);">${sol.fecha}</small></td>
+          <td><strong>${sol.nombre}</strong><br><small>C.C. ${sol.cedula}</small><br><small style="color:var(--primary);">${sol.celular}</small></td>
+          <td>${sol.monto}<br><small style="font-weight:700; color:var(--secondary);">Total: ${sol.total}</small></td>
+          <td><strong style="font-size:15px; color:var(--primary);">${sol.cuotasAbonadas}</strong> de ${sol.totalCuotas} cuotas</td>
+          <td><span class="${claseSaldo}">${formatearCOP(saldoPendiente)}</span></td>
+          <td><span class="badge-status ${estadoClase}">${sol.estado || 'Pendiente'}</span></td>
+          <td>
+            <div class="client-actions">
+              <button class="btn-action btn-plus" onclick="abonarCuota(${index})" title="Registrar Abono Cuota">+ Cuota</button>
+              <button class="btn-action btn-approve" onclick="cambiarEstado(${index}, 'Aprobado')" title="Aprobar">✓</button>
+              <button class="btn-action btn-pay" onclick="marcarPagado(${index})" title="Marcar Pagado">Pagado</button>
+              <button class="btn-action btn-reject" onclick="cambiarEstado(${index}, 'Rechazado')" title="Rechazar">✕</button>
+              <button class="btn-action btn-delete" onclick="eliminarSolicitud(${index})" title="Eliminar">🗑</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      actualizarEstadisticas(solicitudes);
+    }
+
+    function abonarCuota(index) {
+      var solicitudes = JSON.parse(localStorage.getItem('sociocredits_solicitudes') || '[]');
+      var sol = solicitudes[index];
+      if (sol) {
+        if (sol.cuotasAbonadas === undefined) sol.cuotasAbonadas = 0;
+        if (sol.totalCuotas === undefined) sol.totalCuotas = parseInt(sol.plazo) || 4;
+
+        if (sol.cuotasAbonadas < sol.totalCuotas) {
+          sol.cuotasAbonadas++;
+          if (sol.cuotasAbonadas === sol.totalCuotas) {
+            sol.estado = 'Pagado Total';
+          } else if (sol.estado === 'Pendiente') {
+            sol.estado = 'Aprobado';
+          }
+          localStorage.setItem('sociocredits_solicitudes', JSON.stringify(solicitudes));
+          cargarSolicitudes();
+        } else {
+          alert("⚠️ Este crédito ya tiene todas sus cuotas abonadas.");
+        }
+      }
+    }
+
+    function marcarPagado(index) {
+      var solicitudes = JSON.parse(localStorage.getItem('sociocredits_solicitudes') || '[]');
+      if (solicitudes[index]) {
+        solicitudes[index].totalCuotas = solicitudes[index].totalCuotas || parseInt(solicitudes[index].plazo) || 4;
+        solicitudes[index].cuotasAbonadas = solicitudes[index].totalCuotas;
+        solicitudes[index].estado = 'Pagado Total';
+        localStorage.setItem('sociocredits_solicitudes', JSON.stringify(solicitudes));
+        cargarSolicitudes();
+      }
+    }
+
+    function actualizarEstadisticas(solicitudes) {
+      document.getElementById('statTotal').textContent = solicitudes.length;
+      
+      var cap = 0;
+      var gan = 0;
+      solicitudes.forEach(function(s) {
+        if (s.estado !== 'Rechazado') {
+          cap += (s.montoNum || 0);
+          gan += ((s.montoNum || 0) * 0.30);
+        }
+      });
+
+      document.getElementById('statCapital').textContent = formatearCOP(cap);
+      document.getElementById('statGanancias').textContent = formatearCOP(gan);
+    }
+
+    function cambiarEstado(index, nuevoEstado) {
+      var solicitudes = JSON.parse(localStorage.getItem('sociocredits_solicitudes') || '[]');
+      if (solicitudes[index]) {
+        solicitudes[index].estado = nuevoEstado;
+        localStorage.setItem('sociocredits_solicitudes', JSON.stringify(solicitudes));
+        cargarSolicitudes();
+      }
+    }
+
+    function eliminarSolicitud(index) {
+      if (confirm("¿Estás seguro de eliminar este registro del historial?")) {
+        var solicitudes = JSON.parse(localStorage.getItem('sociocredits_solicitudes') || '[]');
+        solicitudes.splice(index, 1);
+        localStorage.setItem('sociocredits_solicitudes', JSON.stringify(solicitudes));
+        cargarSolicitudes();
+      }
+    }
+
+    function limpiarHistorial() {
+      if (confirm("¿Deseas borrar TODO el historial de solicitudes?")) {
+        localStorage.removeItem('sociocredits_solicitudes');
+        cargarSolicitudes();
+      }
+    }
+  </script>
+</body>
+</html>
